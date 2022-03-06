@@ -1,0 +1,66 @@
+import React, { useState } from 'react'
+import { Flex } from '@geoswap/uikit'
+import { getFullDisplayBalance } from 'utils/formatBalance'
+import BigNumber from 'bignumber.js'
+
+import { Label, Box, ContributeButton, ContributeInput } from './styles'
+import useIAODeposit from '../../../hooks/useIAODeposit'
+
+interface Props {
+  currency: string
+  contract: any
+  notLp?: boolean
+  currencyAddress: string
+  disabled?: boolean
+  tokenBalance: BigNumber
+}
+
+const ContributeInputComponent: React.FC<Props> = ({ currency, contract, currencyAddress, disabled, tokenBalance }) => {
+  const [value, setValue] = useState('')
+  const balance = Number(getFullDisplayBalance(tokenBalance)).toFixed(4)
+
+  const { pendingTx, handleDeposit, isAmountValid } = useIAODeposit(contract, currencyAddress, tokenBalance)
+
+  return (
+    <Box>
+      <table>
+        <thead>
+          <th>
+            <Flex justifyContent="space-between" px="8px">
+              <Label>BALANCE: </Label>
+              <Label>
+                {balance} {currency}
+              </Label>
+            </Flex>
+          </th>
+          <th> </th>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <ContributeInput
+                value={value}
+                scale="lg"
+                type="number"
+                min="0"
+                step="0.01"
+                onChange={(e) => setValue(e.currentTarget.value)}
+              />
+            </td>
+            <td>
+              <ContributeButton
+                disabled={disabled || pendingTx || !isAmountValid(value)}
+                variant="yellow"
+                onClick={() => handleDeposit(value, currency)}
+              >
+                CONTRIBUTE
+              </ContributeButton>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </Box>
+  )
+}
+
+export default ContributeInputComponent
